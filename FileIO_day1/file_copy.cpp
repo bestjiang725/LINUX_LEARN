@@ -7,25 +7,23 @@
 
 using namespace std;
 
-int main(){
-    int fd_in=open("source.txt",
-    O_RDONLY,
-    0644
-    );
-    if(fd_in==-1){
-        perror("open source");
+int main(int argc,char *argv[]){
+    if(argc!=3){
+        std::cerr<<"用法："<<argv[0]<<endl;
         return 1;
     }
-    int fd=open("target.txt",
+    int fd_in = open(argv[1], O_RDONLY);
+if (fd_in == -1) {
+    perror("open source");
+    return 1;
+}
 
-    O_WRONLY | O_CREAT | O_TRUNC,
-    0644
-    );
-    if(fd==-1){
-        perror("open target");
-        close(fd_in);
-        return 1;
-    }
+int fd = open(argv[2], O_WRONLY | O_TRUNC | O_CREAT, 0644);
+if (fd == -1) {
+    perror("open target");
+    close(fd_in);
+    return 1;
+}
     char buffer[4096];
     while(1){
         ssize_t n=read(fd_in,buffer,sizeof(buffer));
@@ -34,6 +32,8 @@ int main(){
                 continue;
             }
             perror("read");
+            close(fd_in);
+            close(fd);
             return 1;
         }
         if(n==0)break;
@@ -49,6 +49,8 @@ int main(){
             }
 
             perror("write");
+            close(fd_in);
+            close(fd);
             return 1;
             }
             if(has==0){
